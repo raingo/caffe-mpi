@@ -10,7 +10,7 @@ layer {
   }
   data_param {
     source: "example/mnist_train_lmdb"
-    batch_size: 64
+    batch_size: 60
     backend: LMDB
     rand_skip: 5120
   }

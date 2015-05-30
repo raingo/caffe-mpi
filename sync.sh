@@ -5,5 +5,5 @@ target=/localdisk/yli-data/caffe-ps
 for node in `cat nodefile | sort | uniq`
 do
     ssh $node "mkdir -p $target"
-    rsync -carL dist/ $node:$target
+    rsync -carvL dist/ $node:$target
 done

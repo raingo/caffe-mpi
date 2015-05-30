@@ -1,0 +1,3 @@
+cifar10_full.prototxt 500
+cifar10_quick.prototxt 500
+lenet.prototxt 1000
