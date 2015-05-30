@@ -1,0 +1,9 @@
+
+
+logs*
+dist
+*lmdb
+*.pdf
+*.o
+sgd
+sgd-mpi
