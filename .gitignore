@@ -7,3 +7,5 @@ dist
 *.o
 sgd
 sgd-mpi
+*.pb.*
+evaluator

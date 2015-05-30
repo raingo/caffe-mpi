@@ -1,20 +1,37 @@
 INCLUDE_DIRS = caffe/include caffe/build/src /u/yli/.local/include /usr/local/include /home/qyou/bin/include /u/qyou/lib/imdb/include/
 
-CFLAGS = -std=c++11 -ggdb
+CFLAGS = -std=c++11
 CFLAGS += $(foreach includedir,$(INCLUDE_DIRS),-I$(includedir))
 
-LDFLAGS=-lgflags -lglog -lcaffe -Lcaffe/build/lib -Wl,-rpath,caffe/build/lib/ -ggdb
+COMMON_LD=-lprotobuf -lgflags -lglog -lcaffe
 
-all: sgd sgd-mpi
+LDFLAGS += ${COMMON_LD} -Lcaffe/build/lib -Wl,-rpath,caffe/build/lib/
+EVAL_LDFLAGS += ${COMMON_LD} -Lcaffe/build/lib-cu -Wl,-rpath,caffe/build/lib-cu/ -lcudart -lcublas -lcurand -L/u/qyou/lib/cuda-6.5/lib64/
 
-.sgd.o: sgd.cpp common.hpp evaluator.hpp flags.hpp
+all: sgd sgd-mpi evaluator
+
+.evaluator.o: evaluator.cpp common.hpp evaluator.hpp flags.hpp mpi.hpp snapshot.pb.h
+	g++ evaluator.cpp ${CFLAGS} -c -o .evaluator.o
+evaluator:.evaluator.o .snapshot.pb.o
+	g++ .evaluator.o .snapshot.pb.o -o evaluator ${EVAL_LDFLAGS}
+
+.sgd.o: sgd.cpp common.hpp evaluator.hpp flags.hpp snapshot.pb.h
 	g++ sgd.cpp ${CFLAGS} -c -o .sgd.o
 
-sgd:.sgd.o ./caffe/build/lib/libcaffe.so
-	g++ .sgd.o -o sgd ${LDFLAGS}
+sgd:.sgd.o .snapshot.pb.o
+	g++ .sgd.o .snapshot.pb.o -o sgd ${LDFLAGS}
 
-.sgd-mpi.o: sgd-mpi.cpp common.hpp evaluator.hpp flags.hpp mpi.hpp
+.sgd-mpi.o: sgd-mpi.cpp common.hpp evaluator.hpp flags.hpp mpi.hpp snapshot.pb.h
 	mpicxx sgd-mpi.cpp ${CFLAGS} -c -o .sgd-mpi.o
 
-sgd-mpi:.sgd-mpi.o
-	mpicxx .sgd-mpi.o -o sgd-mpi ${LDFLAGS}
+sgd-mpi:.sgd-mpi.o .snapshot.pb.o
+	mpicxx .sgd-mpi.o .snapshot.pb.o -o sgd-mpi ${LDFLAGS}
+
+snapshot.pb.cc snapshot.pb.h: snapshot.proto
+	protoc snapshot.proto --cpp_out=.
+
+.snapshot.pb.o: snapshot.pb.cc snapshot.pb.h
+	g++ snapshot.pb.cc -c ${CFLAGS} -o .snapshot.pb.o
+
+clean:
+	rm .*.o

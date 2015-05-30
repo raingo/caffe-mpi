@@ -46,6 +46,6 @@ int main(int argc, char** argv) {
             snapshot(net, i, (boost::posix_time::microsec_clock::local_time() - timer).total_milliseconds());
     }
 
-    evaluate(net, FLAGS_eval_iter);
+    save_snapshot(FLAGS_snap_path);
     return 0;
 }

@@ -14,15 +14,15 @@ nodes=`cat $PBS_NODEFILE | wc -l`
 while read -r model eval
 do
     model=$eg_dir/$model
-    echo $model $eval
+    echo $model
 
     for np in `seq $nodes -1 2`
     do
-        ./run_mpi.sh $np $model $eval
+        ./run_mpi.sh $np $model
     done
-    ./run_exp.sh $model $eval
+    ./run_exp.sh $model
 
 done < $eg_dir/configs
 
-rsync logs gpu-cs:/home/yli/workspace/cs458/caffe-ps-v2/logs-$ts -ar
+rsync logs/ gpu-cs:/home/yli/workspace/cs458/caffe-ps-v2/logs-$ts -ar
 echo $0 | mail -s "done" yli

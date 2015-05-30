@@ -2,7 +2,6 @@
 # vim ft=sh
 
 model=$1
-eval=$2
 
 if [ -z "$model" ]
 then
@@ -11,6 +10,6 @@ then
 fi
 
 mkdir -p logs
-log_file=logs/`basename $model`.log
+snap_file=logs/`basename $model`.bin
 
-./bin/sgd -eval_iter $eval -model $model -lr 0.001 -iterations 10000 | tee $log_file
+./bin/sgd -snap_path $snap_file -model $model -lr 0.001 -iterations 10000

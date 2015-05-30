@@ -3,7 +3,6 @@
 
 NumberOfProcesses=$1
 model=$2
-eval=$3
 
 if [ -z "$model" ]
 then
@@ -12,6 +11,6 @@ then
 fi
 
 mkdir -p logs
-log_file=logs/`basename $model`.$NumberOfProcesses.log
+snap_file=logs/`basename $model`.$NumberOfProcesses.bin
 
-mpirun -np $NumberOfProcesses ./bin/sgd-mpi -eval_iter $eval -lr 0.001 -model $model -iterations 10000 | tee $log_file
+mpirun -np $NumberOfProcesses ./bin/sgd-mpi  -lr 0.001 -snap_path $snap_file -model $model -iterations 10000 | tee $log_file

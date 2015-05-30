@@ -7,6 +7,8 @@ DEFINE_int32(snapshot_intv, 50,
         "Number of snapshots to evaluate");
 DEFINE_int32(eval_iter, 1000,
         "number of iterations to cover all samples, cifar=500, lenet=1000");
+DEFINE_string(snap_path, "logs/lenet.snapshot",
+        "the path to save trace");
 DEFINE_double(lr, 0.01,
         "Learning Rate");
 DEFINE_string(model, "example/lenet.prototxt",

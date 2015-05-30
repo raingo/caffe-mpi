@@ -1,0 +1,14 @@
+
+message BufferProto {
+    repeated SnapShotProto snap = 3;
+}
+
+message SnapShotProto {
+    repeated ParamProto param = 1;
+    required int64 iter = 4;
+    required int64 ts = 5;
+}
+
+message ParamProto {
+    repeated float data = 2;
+}
