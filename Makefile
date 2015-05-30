@@ -10,21 +10,27 @@ EVAL_LDFLAGS += ${COMMON_LD} -Lcaffe/build/lib-cu -Wl,-rpath,caffe/build/lib-cu/
 
 all: sgd sgd-mpi evaluator
 
-.evaluator.o: evaluator.cpp common.hpp evaluator.hpp flags.hpp mpi.hpp snapshot.pb.h
+.evaluator.o: evaluator.cpp common.hpp evaluator.hpp flags.hpp mpi.hpp snapshot.pb.h caffe/build/lib-cu/libcaffe.so
 	g++ evaluator.cpp ${CFLAGS} -c -o .evaluator.o
-evaluator:.evaluator.o .snapshot.pb.o
+
+evaluator:.evaluator.o .snapshot.pb.o caffe/build/lib-cu/libcaffe.so
 	g++ .evaluator.o .snapshot.pb.o -o evaluator ${EVAL_LDFLAGS}
 
-.sgd.o: sgd.cpp common.hpp evaluator.hpp flags.hpp snapshot.pb.h
+.sgd.o: sgd.cpp common.hpp evaluator.hpp flags.hpp snapshot.pb.h caffe/build/lib/libcaffe.so
 	g++ sgd.cpp ${CFLAGS} -c -o .sgd.o
 
-sgd:.sgd.o .snapshot.pb.o
+sgd:.sgd.o .snapshot.pb.o caffe/build/lib/libcaffe.so
 	g++ .sgd.o .snapshot.pb.o -o sgd ${LDFLAGS}
 
-.sgd-mpi.o: sgd-mpi.cpp common.hpp evaluator.hpp flags.hpp mpi.hpp snapshot.pb.h
+# build caffe, both cpu version and gpu version
+# cpu version can run on cycle machines, together with release.sh
+caffe/build/lib-cu/libcaffe.so caffe/build/lib/libcaffe.so:
+	cd caffe && make -j8 && mv build/lib lib-cu && make clean && make -j8 CPU_ONLY=1 && mv lib-cu build/
+
+.sgd-mpi.o: sgd-mpi.cpp common.hpp evaluator.hpp flags.hpp mpi.hpp snapshot.pb.h caffe/build/lib/libcaffe.so
 	mpicxx sgd-mpi.cpp ${CFLAGS} -c -o .sgd-mpi.o
 
-sgd-mpi:.sgd-mpi.o .snapshot.pb.o
+sgd-mpi:.sgd-mpi.o .snapshot.pb.o caffe/build/lib/libcaffe.so
 	mpicxx .sgd-mpi.o .snapshot.pb.o -o sgd-mpi ${LDFLAGS}
 
 snapshot.pb.cc snapshot.pb.h: snapshot.proto
@@ -33,5 +39,11 @@ snapshot.pb.cc snapshot.pb.h: snapshot.proto
 .snapshot.pb.o: snapshot.pb.cc snapshot.pb.h
 	g++ snapshot.pb.cc -c ${CFLAGS} -o .snapshot.pb.o
 
+dist: sgd sgd-mpi
+	./release.sh
+
+.PHONY: dist
+
 clean:
-	rm .*.o
+	rm -Rf .*.o sgd sgd-mpi evaluator
+	cd caffe && make clean

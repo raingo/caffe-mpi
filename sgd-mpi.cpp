@@ -40,7 +40,7 @@ void root_node(shared_ptr<Net<Dtype> > net, int iters, Dtype lr)
             snapshot(net, i, (boost::posix_time::microsec_clock::local_time() - timer).total_milliseconds());
     }
 
-    evaluate(net, FLAGS_eval_iter);
+    save_snapshot(FLAGS_snap_path);
 }
 
 void worker_node(shared_ptr<Net<Dtype> > net, int iters)
