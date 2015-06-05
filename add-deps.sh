@@ -7,8 +7,8 @@ BIN=$1
 dist_dir=$2
 BIN_NAME=`basename $BIN`
 
-scp $BIN cycle3:tmp
-ssh cycle3 "ldd tmp/$BIN_NAME | grep not | awk '{print \$1}'" > $dist_dir/.deps
+scp $BIN cycle2:tmp
+ssh cycle2 "ldd tmp/$BIN_NAME | grep not | awk '{print \$1}'" > $dist_dir/.deps
 
 mkdir -p $dist_dir/deps
 
