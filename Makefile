@@ -8,7 +8,7 @@ COMMON_LD=-lprotobuf -lgflags -lglog -lcaffe
 LDFLAGS += ${COMMON_LD} -Lcaffe/build/lib -Wl,-rpath,caffe/build/lib/
 EVAL_LDFLAGS += ${COMMON_LD} -Lcaffe/build/lib-cu -Wl,-rpath,caffe/build/lib-cu/ -lcudart -lcublas -lcurand -L/u/qyou/lib/cuda-6.5/lib64/
 
-all: sgd sgd-mpi evaluator
+all: sgd sgd-mpi evaluator count
 
 .evaluator.o: evaluator.cpp common.hpp evaluator.hpp flags.hpp mpi.hpp snapshot.pb.h caffe/build/lib-cu/libcaffe.so
 	g++ evaluator.cpp ${CFLAGS} -c -o .evaluator.o
@@ -22,10 +22,21 @@ evaluator:.evaluator.o .snapshot.pb.o caffe/build/lib-cu/libcaffe.so
 sgd:.sgd.o .snapshot.pb.o caffe/build/lib/libcaffe.so
 	g++ .sgd.o .snapshot.pb.o -o sgd ${LDFLAGS}
 
+.count.o: count.cpp common.hpp evaluator.hpp flags.hpp snapshot.pb.h caffe/build/lib/libcaffe.so
+	g++ count.cpp ${CFLAGS} -c -o .count.o
+
+count:.count.o .snapshot.pb.o caffe/build/lib/libcaffe.so
+	g++ .count.o .snapshot.pb.o -o count ${LDFLAGS}
+
+
 # build caffe, both cpu version and gpu version
 # cpu version can run on cycle machines, together with release.sh
 caffe/build/lib-cu/libcaffe.so caffe/build/lib/libcaffe.so:
-	cd caffe && make -j8 && mv build/lib lib-cu && make clean && make -j8 CPU_ONLY=1 && mv lib-cu build/
+	make -C caffe
+	mv caffe/build/lib caffe/lib-cu
+	make -C caffe clean
+	make -C caffe CPU_ONLY=1
+	mv caffe/lib-cu caffe/build/
 
 .sgd-mpi.o: sgd-mpi.cpp common.hpp evaluator.hpp flags.hpp mpi.hpp snapshot.pb.h caffe/build/lib/libcaffe.so
 	mpicxx sgd-mpi.cpp ${CFLAGS} -c -o .sgd-mpi.o

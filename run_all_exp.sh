@@ -11,10 +11,11 @@ eg_dir='example'
 
 nodes=`cat $PBS_NODEFILE | wc -l`
 
-while read -r model eval
-do
-    model=$eg_dir/$model
+#for model in `find $eg_dir -name '*.prototxt'`
+#do
+    model=./example/lenet.prototxt
     echo $model
+    continue
 
     for np in `seq $nodes -1 2`
     do
@@ -22,7 +23,7 @@ do
     done
     ./run_exp.sh $model
 
-done < $eg_dir/configs
+#done
 
 rsync logs/ gpu-cs:/home/yli/workspace/cs458/caffe-ps-v2/logs-$ts -ar
 echo $0 | mail -s "done" yli

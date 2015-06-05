@@ -29,6 +29,17 @@ shared_ptr<Net<Dtype> > init_net(const string &net_def)
     return shared_ptr<Net<Dtype> >(new Net<Dtype>(net_param));
 }
 
+int num_of_params(shared_ptr<Net<Dtype> > &net)
+{
+    auto net_params = net -> params();
+    int size = 0;
+    for (int i = 0; i < net_params.size(); i++) {
+        auto param = net_params[i];
+        size += param -> count();
+    }
+    return size;
+}
+
 double sumsq(const Dtype *vec, int cnt)
 {
     double res = 0.0;
